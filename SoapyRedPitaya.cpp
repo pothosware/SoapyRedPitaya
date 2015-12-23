@@ -24,13 +24,12 @@
 #include <string.h>
 
 #if defined(_WIN32)
-#include <crtdefs.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
 #ifndef ssize_t
-#define ssize_t int
+#define ssize_t SSIZE_T
 #endif
 #else
 #include <unistd.h>
