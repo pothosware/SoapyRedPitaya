@@ -22,14 +22,19 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
 
 #if defined(_WIN32)
+#include <crtdefs.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
+#ifndef ssize_t
+#define ssize_t int
+#endif
 #else
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
