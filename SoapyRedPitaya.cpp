@@ -28,9 +28,6 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
-#ifndef ssize_t
-#define ssize_t SSIZE_T
-#endif
 #else
 #include <unistd.h>
 #include <fcntl.h>
@@ -179,7 +176,7 @@ public:
         {
             _sockets[i] = openConnection();
 
-            command = i;
+            command = (uint32_t)i;
             sendCommand(_sockets[i], command);
         }
 
@@ -234,13 +231,15 @@ public:
         long long &timeNs,
         const long timeoutUs = 100000)
     {
-        size_t total = 8 * numElems;
-        unsigned long size = 0;
         struct timeval timeout;
 
         #if defined(_WIN32)
+        u_long total = 8 * (u_long)numElems;
+        u_long size = 0;
         ::ioctlsocket(_sockets[1], FIONREAD, &size);
         #else
+        int total = 8 * numElems;
+        int size = 0;
         ::ioctl(_sockets[1], FIONREAD, &size);
         #endif
 
@@ -266,7 +265,7 @@ public:
         ::recv(_sockets[1], buffs[0], total, MSG_WAITALL);
         #endif
 
-        return numElems;
+        return (int)numElems;
     }
 
     int writeStream(
@@ -277,18 +276,19 @@ public:
         const long long timeNs = 0,
         const long timeoutUs = 100000)
     {
-        ssize_t total = 8 * numElems;
-        ssize_t size;
-
         #if defined(_WIN32)
+        int total = 8 * (int)numElems;
+        int size;
         size = ::send(_sockets[3], (char *)buffs[0], total, 0);
         #else
+        ssize_t total = 8 * numElems;
+        ssize_t size;
         size = ::send(_sockets[3], buffs[0], total, MSG_NOSIGNAL);
         #endif
 
         if(size < total) return SOAPY_SDR_TIMEOUT;
 
-        return numElems;
+        return (int)numElems;
     }
 
     /*******************************************************************
@@ -430,15 +430,28 @@ private:
     string _addr;
     unsigned short _port;
     double _freq[2], _rate[2];
+    #if defined(_WIN32)
+    SOCKET _sockets[4];
+    #else
     int _sockets[4];
+    #endif
 
+    #if defined(_WIN32)
+    SOCKET openConnection()
+    #else
     int openConnection()
+    #endif
     {
         stringstream message;
         struct sockaddr_in addr;
         fd_set writefds;
         struct timeval timeout;
+        int result;
+        #if defined(_WIN32)
+        SOCKET socket;
+        #else
         int socket;
+        #endif
 
         if((socket = ::socket(AF_INET, SOCK_STREAM, 0)) < 0)
         {
@@ -449,15 +462,15 @@ private:
 
         #if defined(_WIN32)
         u_long mode = 1;
-        ioctlsocket(socket, FIONBIO, &mode);
+        ::ioctlsocket(socket, FIONBIO, &mode);
         #else
-        int flags = fcntl(socket, F_GETFL, 0);
-        fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+        int flags = ::fcntl(socket, F_GETFL, 0);
+        ::fcntl(socket, F_SETFL, flags | O_NONBLOCK);
         #endif
 
         memset(&addr, 0, sizeof(addr));
         addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = inet_addr(_addr.c_str());
+        inet_pton(AF_INET, _addr.c_str(), &addr.sin_addr);
         addr.sin_port = htons(_port);
 
         ::connect(socket, (struct sockaddr *)&addr, sizeof(addr));
@@ -468,7 +481,13 @@ private:
         FD_ZERO(&writefds);
         FD_SET(socket, &writefds);
 
-        if(::select(socket + 1, 0, &writefds, 0, &timeout) <= 0)
+        #if defined(_WIN32)
+        result = ::select(0, 0, &writefds, 0, &timeout);
+        #else
+        result = ::select(socket + 1, 0, &writefds, 0, &timeout);
+        #endif
+
+        if(result <= 0)
         {
             message << "SoapyRedPitaya could not connect to " << _addr << ":" << _port;
             throw runtime_error(message.str());
@@ -478,26 +497,32 @@ private:
 
         #if defined(_WIN32)
         mode = 0;
-        ioctlsocket(socket, FIONBIO, &mode);
+        ::ioctlsocket(socket, FIONBIO, &mode);
         #else
-        flags = fcntl(socket, F_GETFL, 0);
-        fcntl(socket, F_SETFL, flags & ~O_NONBLOCK);
+        flags = ::fcntl(socket, F_GETFL, 0);
+        ::fcntl(socket, F_SETFL, flags & ~O_NONBLOCK);
         #endif
 
         return socket;
     }
 
+    #if defined(_WIN32)
+    void sendCommand(SOCKET socket, uint32_t command)
+    #else
     void sendCommand(int socket, uint32_t command)
+    #endif
     {
-        ssize_t total = sizeof(command);
-        ssize_t size;
         stringstream message;
 
         if(socket < 0) return;
 
         #if defined(_WIN32)
+        int total = sizeof(command);
+        int size;
         size = ::send(socket, (char *)&command, total, 0);
         #else
+        ssize_t total = sizeof(command);
+        ssize_t size;
         size = ::send(socket, &command, total, MSG_NOSIGNAL);
         #endif
 
