@@ -28,6 +28,7 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #include <windows.h>
+#define INVSOC INVALID_SOCKET
 #else
 #include <unistd.h>
 #include <fcntl.h>
@@ -37,6 +38,10 @@
 #include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifndef SOCKET
+#define SOCKET int
+#define INVSOC (-1)
+#endif
 #endif
 
 #include "SoapySDR/Device.hpp"
@@ -75,7 +80,7 @@ public:
 
         for(i = 0; i < 4; ++i)
         {
-            _sockets[i] = -1;
+            _sockets[i] = INVSOC;
         }
 
         if(args.count("addr")) _addr = args.at("addr");
@@ -158,13 +163,13 @@ public:
         double frequency = 0.0, rate = 0.0;
         size_t i, start = 0;
 
-        if(direction == SOAPY_SDR_RX && _sockets[0] < 0)
+        if(direction == SOAPY_SDR_RX && _sockets[0] == INVSOC)
         {
             start = 0;
             frequency = _freq[0];
             rate = _rate[0];
         }
-        else if(direction == SOAPY_SDR_TX && _sockets[2] < 0)
+        else if(direction == SOAPY_SDR_TX && _sockets[2] == INVSOC)
         {
             start = 2;
             frequency = _freq[1];
@@ -203,8 +208,8 @@ public:
             ::close(_sockets[0]);
             #endif
 
-            _sockets[1] = -1;
-            _sockets[0] = -1;
+            _sockets[1] = INVSOC;
+            _sockets[0] = INVSOC;
         }
         else if(direction == SOAPY_SDR_TX)
         {
@@ -216,8 +221,8 @@ public:
             ::close(_sockets[2]);
             #endif
 
-            _sockets[3] = -1;
-            _sockets[2] = -1;
+            _sockets[3] = INVSOC;
+            _sockets[2] = INVSOC;
         }
 
         return 0;
@@ -430,30 +435,19 @@ private:
     string _addr;
     unsigned short _port;
     double _freq[2], _rate[2];
-    #if defined(_WIN32)
     SOCKET _sockets[4];
-    #else
-    int _sockets[4];
-    #endif
 
-    #if defined(_WIN32)
     SOCKET openConnection()
-    #else
-    int openConnection()
-    #endif
     {
         stringstream message;
         struct sockaddr_in addr;
         fd_set writefds;
         struct timeval timeout;
         int result;
-        #if defined(_WIN32)
         SOCKET socket;
-        #else
-        int socket;
-        #endif
 
-        if((socket = ::socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        socket = ::socket(AF_INET, SOCK_STREAM, 0);
+        if(socket == INVSOC)
         {
             throw runtime_error("SoapyRedPitaya could not create TCP socket");
         }
@@ -506,15 +500,11 @@ private:
         return socket;
     }
 
-    #if defined(_WIN32)
     void sendCommand(SOCKET socket, uint32_t command)
-    #else
-    void sendCommand(int socket, uint32_t command)
-    #endif
     {
         stringstream message;
 
-        if(socket < 0) return;
+        if(socket == INVSOC) return;
 
         #if defined(_WIN32)
         int total = sizeof(command);
