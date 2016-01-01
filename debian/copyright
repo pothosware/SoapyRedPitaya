@@ -1,0 +1,10 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: soapyredpitaya
+Source: https://github.com/pothosware/SoapyRedPitaya/wiki
+
+Files: *
+Copyright: Copyright (C) 2015  Pavel Demin
+License: GPL-3
+ On Debian systems, the full text of the GNU General Public
+ License version 3 can be found in the file
+ `/usr/share/common-licenses/GPL-3'.
