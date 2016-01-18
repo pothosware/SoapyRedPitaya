@@ -530,6 +530,26 @@ private:
 SoapySDR::KwargsList findSoapyRedPitaya(const SoapySDR::Kwargs &args)
 {
     vector<SoapySDR::Kwargs> results;
+
+    //the user explicitly specified the redpitaya driver
+    if (args.count("driver") != 0 and args.at("driver") == "redpitaya")
+    {
+        //TODO perform a test connection to validate device presence
+        results.push_back(args);
+        return results;
+    }
+
+    //the user only passed an address
+    if (args.count("addr") != 0)
+    {
+        //TODO this could refer to an address for other drivers
+        //we need to test connect before its safe to yield
+        //results.push_back(args);
+        return results;
+    }
+
+    //otherwise, perform a discovery for devices on the LAN
+    //TODO
     return results;
 }
 
