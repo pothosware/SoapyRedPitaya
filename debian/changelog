@@ -1,5 +1,5 @@
-soapyredpitaya (0.0.0) unstable; urgency=low
+soapyredpitaya (0.1.0) unstable; urgency=low
 
-  * pending
+  * Release 0.1.0 (2016-01-19)
 
- -- Josh Blum <josh@pothosware.com>  Thu, 31 Dec 2015 18:41:28 -0800
+ -- Josh Blum <josh@pothosware.com>  Tue, 19 Jan 2016 17:24:16 -0800
