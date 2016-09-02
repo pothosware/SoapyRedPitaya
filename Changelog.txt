@@ -1,0 +1,9 @@
+Release 0.1.1 (pending)
+==========================
+
+- Update debian files for SoapySDR module ABI format
+
+Release 0.1.0 (2016-01-11)
+==========================
+
+- Initial release of Soapy RedPitaya support module
