@@ -1,13 +1,13 @@
 # Soapy SDR module for Red Pitaya
 
-##Build Status
+## Build Status
 
 - Travis: [![Travis Build Status](https://travis-ci.org/pothosware/SoapyRedPitaya.svg?branch=master)](https://travis-ci.org/pothosware/SoapyRedPitaya)
 
-##Dependencies
+## Dependencies
 
 * SoapySDR - https://github.com/pothosware/SoapySDR/wiki
 
-##Documentation
+## Documentation
 
 * https://github.com/pothosware/SoapyRedPitaya/wiki
