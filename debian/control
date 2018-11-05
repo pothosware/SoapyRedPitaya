@@ -12,7 +12,7 @@ Homepage: https://github.com/pothosware/SoapyRedPitaya/wiki
 Vcs-Git: https://github.com/pothosware/SoapyRedPitaya.git
 Vcs-Browser: https://github.com/pothosware/SoapyRedPitaya
 
-Package: soapysdr0.6-module-redpitaya
+Package: soapysdr0.7-module-redpitaya
 Architecture: any
 Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -21,7 +21,7 @@ Description: Soapy RedPitaya - RedPitaya device support for Soapy SDR.
 
 Package: soapysdr-module-redpitaya
 Architecture: all
-Depends: soapysdr0.6-module-redpitaya, ${misc:Depends}
+Depends: soapysdr0.7-module-redpitaya, ${misc:Depends}
 Description: Soapy RedPitaya - RedPitaya device support for Soapy SDR.
  A Soapy module that supports RedPitaya devices within the Soapy API.
  .
