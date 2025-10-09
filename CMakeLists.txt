@@ -1,7 +1,7 @@
 ########################################################################
 # Project setup
 ########################################################################
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.12...3.10)
 project(SoapyRedPitaya CXX)
 enable_testing()
 
