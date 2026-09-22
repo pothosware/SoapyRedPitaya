@@ -22,6 +22,11 @@ if (NOT SoapySDR_FOUND)
     return()
 endif ()
 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    #disable warnings for unused parameters
+    add_compile_options(-Wno-unused-parameter)
+endif()
+
 SOAPY_SDR_MODULE_UTIL(
     TARGET RedPitaya
     SOURCES SoapyRedPitaya.cpp
